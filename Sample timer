@@ -1,0 +1,40 @@
+import tkinter as tk
+from datetime import timedelta, datetime
+
+def format_output(td):
+    seconds = int(td.total_seconds())
+    hundredths = str(td.microseconds).rjust(6, '0')[:2]
+    return seconds, hundredths
+
+small = ("Helvetica", 60)
+large = ("Helvetica", 120)
+
+class Countdown(tk.Tk):
+    def __init__(self, seconds):
+        super().__init__()
+        self.title('Countdown')
+        self.target = datetime.now() + timedelta(seconds=seconds)
+
+        # Create StringVar objects
+        self.seconds = tk.StringVar()
+        self.hundredths = tk.StringVar()
+
+        # Link the labels to the StringVar objects
+        label1 = tk.Label(textvariable=self.seconds, font=large)
+        label2 = tk.Label(textvariable=self.hundredths, font=small)
+        label1.grid(row=0, column=0)
+        label2.grid(row=0, column=1, sticky="n")
+
+        self.update()
+
+    def update(self):
+        td = self.target - datetime.now()
+        if td.total_seconds() > 0:
+            seconds, hundredths = format_output(td)
+            self.seconds.set(seconds)
+            self.hundredths.set(hundredths)
+            self.after(10, self.update)
+
+app = Countdown(10)
+app.mainloop()
+
