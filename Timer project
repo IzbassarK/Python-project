@@ -1,0 +1,79 @@
+import math
+import tkinter as tk
+from datetime import datetime
+
+bg = "black"
+width = 1000
+height = 1000
+
+
+class Stopwatch(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title('stopwatch')
+        self.configure(bg=bg)
+        self.minsize(width, height)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.canvas = tk.Canvas(
+            bg=bg,
+            width=width,
+            height=height,
+            highlightthickness=0
+        )
+        self.canvas.grid()
+        self.draw_face()
+        self.millisecond_hand = self.canvas.create_line(
+            0, 0, 0, 0, fill="black",
+            width=5, capstyle=tk.ROUND
+        )
+        self.second_hand = self.canvas.create_line(
+            0, 0, 0, 0, fill="black",
+            width=10, capstyle=tk.ROUND
+        )
+        self.minute_hand = self.canvas.create_line(
+            0, 0, 0, 0, fill="black",
+            width=20, capstyle=tk.ROUND
+        )
+        self.start = datetime.now()
+        self.update()
+        self.draw_lines()
+
+    def update(self):
+        elapsed = datetime.now() - self.start
+        milliseconds_angle = elapsed.microseconds / 1000000 * 360 - 90
+        seconds_angle = (elapsed.seconds % 60) / 60 * 360 - 90
+        minutes_angle = (elapsed.seconds // 60) / 60 * 360 - 90
+        self.move_hand(self.millisecond_hand, milliseconds_angle, 275)
+        self.move_hand(self.second_hand, seconds_angle, 425)
+        self.move_hand(self.minute_hand, minutes_angle, 325)
+        self.after(10, self.update)
+
+    def draw_face(self):
+        self.canvas.create_oval(0, 0, width, height, fill="pink")
+        self.canvas.create_oval(50, 50, width - 50, height - 50, fill="white")
+
+    def draw_lines(self):
+        for angle in range(0, 360, 30):
+            x1, y1 = self.calculate_coordinates(angle, 200)
+            x2, y2 = self.calculate_coordinates(angle, 250)
+            self.canvas.create_line(x1, y1, x2, y2, fill="black", width=5)
+
+    def calculate_coordinates(self, angle, r):
+        x = r * math.cos(math.radians(angle))
+        y = r * math.sin(math.radians(angle))
+        return width / 2 + x, height / 2 + y
+
+    def move_hand(self, hand, angle, r):
+        x = r * math.cos(math.radians(angle))
+        y = r * math.sin(math.radians(angle))
+        self.canvas.coords(
+            hand,
+            width / 2,
+            height / 2,
+            width / 2 + x,
+            height / 2 + y
+        )
+
+app = Stopwatch()
+app.mainloop()
